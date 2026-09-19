@@ -1,8 +1,12 @@
 import express from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const LTA_ENDPOINT = "https://datamall2.mytransport.sg/ltaodataservice/CarParkAvailabilityv2";
 const LTA_API_KEY = process.env.LTA_API_KEY;
@@ -51,6 +55,22 @@ async function fetchAllCarparks() {
   return all;
 }
 
+// Public traffic (the plain /api/carparks endpoint, used by the standalone
+// site) plus the MCP tool both end up calling this. A short in-memory cache
+// means many simultaneous visitors share one upstream fetch instead of each
+// triggering their own hit against LTA's API and its rate limits.
+let carparkCache = { data: null, fetchedAt: 0 };
+const CACHE_MS = 25000;
+async function getAllCarparksCached() {
+  const now = Date.now();
+  if (carparkCache.data && now - carparkCache.fetchedAt < CACHE_MS) {
+    return carparkCache.data;
+  }
+  const data = await fetchAllCarparks();
+  carparkCache = { data, fetchedAt: now };
+  return data;
+}
+
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -84,6 +104,34 @@ function shapeRecord(raw, from) {
     lng: pos ? pos.lng : null,
     distanceKm:
       from && pos ? Number(haversineKm(from.lat, from.lng, pos.lat, pos.lng).toFixed(2)) : null
+  };
+}
+
+/** Shared query logic used by both the MCP tool and the plain /api/carparks route. */
+async function queryCarparks({ lat, lng, radiusKm, lotType, limit }) {
+  const from = typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null;
+  const cap = limit ?? 20;
+
+  const raw = await getAllCarparksCached();
+  let records = raw.map((r) => shapeRecord(r, from));
+
+  if (lotType) {
+    records = records.filter((r) => r.lotType === lotType);
+  }
+  if (from) {
+    const radius = radiusKm ?? 2;
+    records = records.filter((r) => r.distanceKm !== null && r.distanceKm <= radius);
+    records.sort((a, b) => a.distanceKm - b.distanceKm);
+  } else {
+    records.sort((a, b) => b.availableLots - a.availableLots);
+  }
+
+  const results = records.slice(0, cap);
+  return {
+    fetchedAt: new Date().toISOString(),
+    count: results.length,
+    totalMatched: records.length,
+    carparks: results
   };
 }
 
@@ -132,43 +180,9 @@ server.registerTool(
       };
     }
 
-    const from = typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null;
-    const cap = limit ?? 20;
-
     try {
-      const raw = await fetchAllCarparks();
-      let records = raw.map((r) => shapeRecord(r, from));
-
-      if (lotType) {
-        records = records.filter((r) => r.lotType === lotType);
-      }
-      if (from) {
-        const radius = radiusKm ?? 2;
-        records = records.filter((r) => r.distanceKm !== null && r.distanceKm <= radius);
-        records.sort((a, b) => a.distanceKm - b.distanceKm);
-      } else {
-        records.sort((a, b) => b.availableLots - a.availableLots);
-      }
-
-      const results = records.slice(0, cap);
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(
-              {
-                fetchedAt: new Date().toISOString(),
-                count: results.length,
-                totalMatched: records.length,
-                carparks: results
-              },
-              null,
-              2
-            )
-          }
-        ]
-      };
+      const payload = await queryCarparks({ lat, lng, radiusKm, lotType, limit });
+      return { content: [{ type: "text", text: JSON.stringify(payload, null, 2) }] };
     } catch (err) {
       return {
         isError: true,
@@ -180,6 +194,40 @@ server.registerTool(
 
 const app = express();
 app.use(express.json());
+
+// Plain JSON API for the public, standalone site (public/index.html) — no
+// claude.ai account or connector needed, just an ordinary fetch() call.
+app.get("/api/carparks", async (req, res) => {
+  if (!LTA_API_KEY) {
+    return res.status(503).json({ error: "Server misconfiguration: LTA_API_KEY is not set." });
+  }
+  try {
+    const q = req.query;
+    const parseNum = (v) => (v === undefined ? undefined : Number(v));
+    const lat = parseNum(q.lat);
+    const lng = parseNum(q.lng);
+    if (lat !== undefined && (Number.isNaN(lat) || lat < 1 || lat > 2)) {
+      return res.status(400).json({ error: "lat must be between 1 and 2 (Singapore only)." });
+    }
+    if (lng !== undefined && (Number.isNaN(lng) || lng < 103 || lng > 104.2)) {
+      return res.status(400).json({ error: "lng must be between 103 and 104.2 (Singapore only)." });
+    }
+    const lotType = ["C", "M", "H"].includes(q.lotType) ? q.lotType : undefined;
+    const radiusKm = parseNum(q.radiusKm);
+    const limit = parseNum(q.limit);
+
+    // Public endpoint: cap what any one request can pull, regardless of what's asked.
+    const safeLimit = Math.min(Number.isFinite(limit) ? limit : 40, 100);
+    const safeRadius = Number.isFinite(radiusKm) ? Math.min(radiusKm, 20) : undefined;
+
+    const payload = await queryCarparks({ lat, lng, radiusKm: safeRadius, lotType, limit: safeLimit });
+    res.set("Cache-Control", "public, max-age=20");
+    res.set("Access-Control-Allow-Origin", "*");
+    res.json(payload);
+  } catch (err) {
+    res.status(502).json({ error: `Failed to fetch carpark data: ${err.message}` });
+  }
+});
 
 // Stateless mode: a fresh transport per request keeps things simple and
 // horizontally scalable (no in-memory session affinity needed).
@@ -210,6 +258,10 @@ app.delete("/mcp", (_req, res) => res.status(405).send("Method not allowed (stat
 
 app.get("/health", (_req, res) => res.json({ ok: true, hasApiKey: Boolean(LTA_API_KEY) }));
 
+// The standalone public site — plain HTML/JS, no claude.ai account needed.
+// Served last so it never shadows the API routes above.
+app.use(express.static(path.join(__dirname, "public")));
+
 app.listen(PORT, () => {
-  console.log(`[parkpilot-mcp] listening on :${PORT} (POST /mcp, GET /health)`);
+  console.log(`[parkpilot-mcp] listening on :${PORT} (GET / for the site, POST /mcp, GET /api/carparks, GET /health)`);
 });
