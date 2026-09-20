@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ParkPilot</title>
-<meta name="description" content="Live Singapore carpark availability from LTA DataMall.">
+<meta name="description" content="Find nearby malls and carparks in Singapore & JB that allow motorcycle parking, with rate info.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,661 +13,132 @@
   html{scroll-padding-top:env(safe-area-inset-top,0px)}
   img{max-width:100%}
 
-  /* Palette matched to RemindClient (navy/teal) — light mode below is a
-     teal-tinted variant since RemindClient itself only ships a dark theme. */
   :root{
-    --bg:#f3faf9;
-    --surface:#ffffff;
-    --surface-2:#e7f5f3;
-    --text:#0a1420;
-    --text-muted:#56727a;
-    --border:#d7ece9;
-    --accent:#0e7c66;
-    --accent-strong:#0a5c4d;
-    --accent-soft:#dff6f2;
-    --ok:#178a6f;
-    --ok-soft:#e1f5ef;
-    --warn:#a9790a;
-    --warn-soft:#fdf3d8;
-    --full:#c0392b;
-    --full-soft:#fbe2df;
+    --bg:#f3faf9; --surface:#ffffff; --surface-2:#e7f5f3;
+    --text:#0a1420; --text-muted:#56727a; --border:#d7ece9;
+    --accent:#0e7c66; --accent-strong:#0a5c4d; --accent-soft:#dff6f2;
+    --ok:#178a6f; --ok-soft:#e1f5ef;
+    --warn:#a9790a; --warn-soft:#fdf3d8;
+    --full:#c0392b; --full-soft:#fbe2df;
     --shadow-sm:0 1px 2px rgba(10,20,32,.06);
     --shadow-md:0 10px 30px rgba(10,20,32,.10);
-    --radius:12px;
-    color-scheme:light;
+    --radius:12px; color-scheme:light;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#0a1420;
-      --surface:#101e2e;
-      --surface-2:#16283b;
-      --text:#ffffff;
-      --text-muted:#9fb3be;
-      --border:rgba(255,255,255,.08);
-      --accent:#2ec4b6;
-      --accent-strong:#6be0d3;
-      --accent-soft:rgba(46,196,182,.15);
-      --ok:#2ec4b6;
-      --ok-soft:rgba(46,196,182,.12);
-      --warn:#ffe066;
-      --warn-soft:rgba(255,224,102,.15);
-      --full:#ff6b6b;
-      --full-soft:rgba(192,57,43,.25);
-      --shadow-sm:0 1px 2px rgba(0,0,0,.3);
-      --shadow-md:0 10px 30px rgba(0,0,0,.45);
+      --bg:#0a1420; --surface:#101e2e; --surface-2:#16283b;
+      --text:#ffffff; --text-muted:#9fb3be; --border:rgba(255,255,255,.08);
+      --accent:#2ec4b6; --accent-strong:#6be0d3; --accent-soft:rgba(46,196,182,.15);
+      --ok:#2ec4b6; --ok-soft:rgba(46,196,182,.12);
+      --warn:#ffe066; --warn-soft:rgba(255,224,102,.15);
+      --full:#ff6b6b; --full-soft:rgba(192,57,43,.25);
+      --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow-md:0 10px 30px rgba(0,0,0,.45);
       color-scheme:dark;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#0a1420;
-    --surface:#101e2e;
-    --surface-2:#16283b;
-    --text:#ffffff;
-    --text-muted:#9fb3be;
-    --border:rgba(255,255,255,.08);
-    --accent:#2ec4b6;
-    --accent-strong:#6be0d3;
-    --accent-soft:rgba(46,196,182,.15);
-    --ok:#2ec4b6;
-    --ok-soft:rgba(46,196,182,.12);
-    --warn:#ffe066;
-    --warn-soft:rgba(255,224,102,.15);
-    --full:#ff6b6b;
-    --full-soft:rgba(192,57,43,.25);
-    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
-    --shadow-md:0 10px 30px rgba(0,0,0,.45);
+    --bg:#0a1420; --surface:#101e2e; --surface-2:#16283b;
+    --text:#ffffff; --text-muted:#9fb3be; --border:rgba(255,255,255,.08);
+    --accent:#2ec4b6; --accent-strong:#6be0d3; --accent-soft:rgba(46,196,182,.15);
+    --ok:#2ec4b6; --ok-soft:rgba(46,196,182,.12);
+    --warn:#ffe066; --warn-soft:rgba(255,224,102,.15);
+    --full:#ff6b6b; --full-soft:rgba(192,57,43,.25);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow-md:0 10px 30px rgba(0,0,0,.45);
     color-scheme:dark;
   }
 
   *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  }
-  h1,h2,h3{
-    font-family:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
-  }
-  .mono{
-    font-family:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
-    font-variant-numeric:tabular-nums;
-  }
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;}
+  h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;}
+  .mono{font-family:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;font-variant-numeric:tabular-nums;}
   button{font-family:inherit;}
   a{color:inherit;}
 
-  .app{
-    max-width:480px;
-    margin:0 auto;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    position:relative;
-  }
+  .app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative;}
 
-  /* ---------- Header ---------- */
-  header{
-    position:sticky;
-    top:env(safe-area-inset-top,0px);
-    z-index:20;
-    background:var(--bg);
-    padding:16px 18px 10px;
-    border-bottom:1px solid var(--border);
-  }
-  .brand{
-    display:flex;
-    align-items:baseline;
-    gap:8px;
-    margin-bottom:12px;
-  }
-  .brand-mark{
-    width:26px;height:26px;
-    border-radius:8px;
-    background:var(--accent);
-    display:flex;align-items:center;justify-content:center;
-    flex:none;
-  }
+  header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding:16px 18px 10px;border-bottom:1px solid var(--border);}
+  .brand{display:flex;align-items:baseline;gap:8px;margin-bottom:12px;}
+  .brand-mark{width:26px;height:26px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:none;}
   .brand-mark svg{width:15px;height:15px;}
-  .brand h1{
-    font-size:19px;
-    font-weight:800;
-    letter-spacing:-0.02em;
-    margin:0;
-  }
-  .brand .tag{
-    font-size:11.5px;
-    color:var(--text-muted);
-    font-weight:600;
-    letter-spacing:.02em;
-  }
+  .brand h1{font-size:19px;font-weight:800;letter-spacing:-0.02em;margin:0;}
+  .brand .tag{font-size:11.5px;color:var(--text-muted);font-weight:600;letter-spacing:.02em;}
 
-  .search-row{
-    display:flex;
-    gap:8px;
+  .locate-row{display:flex;gap:8px;}
+  .locate-btn-main{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:13px 16px;border-radius:12px;border:none;
+    background:var(--accent);color:#fff;font-size:14.5px;font-weight:800;cursor:pointer;
   }
-  .search-box{
-    flex:1;
-    position:relative;
-  }
-  .search-box svg{
-    position:absolute;
-    left:12px;top:50%;transform:translateY(-50%);
-    width:16px;height:16px;
-    color:var(--text-muted);
-    pointer-events:none;
-  }
-  .search-box input{
-    width:100%;
-    padding:11px 12px 11px 36px;
-    border-radius:11px;
-    border:1px solid var(--border);
-    background:var(--surface);
-    color:var(--text);
-    font-size:14.5px;
-    font-weight:600;
-    outline:none;
-  }
-  .search-box input::placeholder{color:var(--text-muted);font-weight:500;}
-  .search-box input:focus{border-color:var(--accent);}
-  .locate-btn{
-    flex:none;
-    width:42px;height:42px;
-    border-radius:11px;
-    border:1px solid var(--border);
-    background:var(--surface);
-    color:var(--text);
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;
-  }
-  .locate-btn svg{width:18px;height:18px;}
-  .locate-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-strong);}
-  .locate-btn.loading svg{animation:spin 1s linear infinite;}
-  @media (prefers-reduced-motion: reduce){ .locate-btn.loading svg{animation:none;} }
+  .locate-btn-main svg{width:17px;height:17px;}
+  .locate-btn-main.loading svg{animation:spin 1s linear infinite;}
+  .locate-btn-main.found{background:var(--ok);}
+  @media (prefers-reduced-motion: reduce){ .locate-btn-main.loading svg{animation:none;} }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  .suggest{
-    display:flex;
-    gap:6px;
-    overflow-x:auto;
-    margin-top:10px;
-    padding-bottom:2px;
-    scrollbar-width:none;
-  }
-  .suggest::-webkit-scrollbar{display:none;}
-  .suggest button{
-    flex:none;
-    padding:6px 12px;
-    border-radius:999px;
-    border:1px solid var(--border);
-    background:var(--surface);
-    color:var(--text-muted);
-    font-size:12.5px;
-    font-weight:700;
-    cursor:pointer;
-    white-space:nowrap;
-  }
-  .suggest button.active{
-    background:var(--accent);
-    border-color:var(--accent);
-    color:#fff;
+  .loc-status{
+    margin-top:8px;font-size:12px;font-weight:600;color:var(--text-muted);
+    text-align:center;min-height:16px;
   }
 
-  /* ---------- Live banner ---------- */
-  .live-banner{
-    margin:10px 18px 0;
-    padding:9px 12px;
-    border-radius:11px;
-    font-size:12px;
-    font-weight:700;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  .live-banner.info{background:var(--accent-soft);color:var(--accent-strong);}
-  .live-banner.warn{background:var(--warn-soft);color:var(--warn);}
-  .live-banner.error{background:var(--full-soft);color:var(--full);}
-  .live-banner .dot{
-    width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;
-    animation:blink 1.6s ease-in-out infinite;
-  }
-  @media (prefers-reduced-motion: reduce){ .live-banner .dot{ animation:none; } }
-  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
-  .live-banner span{flex:1;}
-
-  /* ---------- Toolbar ---------- */
-  .toolbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    padding:12px 18px 0;
-    flex-wrap:wrap;
-    row-gap:8px;
-  }
+  .toolbar{display:flex;gap:8px;padding:12px 18px 0;flex-wrap:wrap;row-gap:8px;}
   .filter-btn{
-    display:flex;align-items:center;gap:6px;
-    border:1px solid var(--border);
-    background:var(--surface);
-    padding:7px 12px;
-    border-radius:10px;
-    font-size:12.5px;
-    font-weight:700;
-    color:var(--text);
-    cursor:pointer;
+    display:flex;align-items:center;gap:6px;border:1px solid var(--border);
+    background:var(--surface);padding:7px 12px;border-radius:10px;
+    font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;
   }
   .filter-btn svg{width:14px;height:14px;}
-  .filter-btn .dot{
-    width:6px;height:6px;border-radius:50%;background:var(--accent);
-    display:none;
-  }
-  .filter-btn.has-active .dot{display:block;}
   .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .toolbar-actions{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    row-gap:8px;
-  }
 
-  .result-meta{
-    padding:12px 18px 4px;
-    font-size:12.5px;
-    color:var(--text-muted);
-    font-weight:600;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:8px;
+  .country-tabs{display:flex;gap:6px;padding:12px 18px 0;}
+  .country-tab{
+    flex:1;text-align:center;padding:9px 6px;border-radius:10px;
+    border:1px solid var(--border);background:var(--surface-2);
+    font-size:13px;font-weight:700;cursor:pointer;
   }
-  .result-meta .updated{
-    font-size:11px;
-    font-weight:600;
-  }
-  .result-meta select{
-    border:none;
-    background:transparent;
-    color:var(--accent);
-    font-weight:700;
-    font-size:12.5px;
-    font-family:inherit;
-  }
+  .country-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 
-  /* ---------- List ---------- */
-  main{
-    flex:1;
-    padding:6px 18px 32px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
+  .result-meta{padding:12px 18px 4px;font-size:12.5px;color:var(--text-muted);font-weight:600;}
+
+  main{flex:1;padding:6px 18px 32px;display:flex;flex-direction:column;gap:10px;}
 
   .lot-card{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:13px 14px;
-    display:flex;
-    gap:12px;
-    cursor:pointer;
-    box-shadow:var(--shadow-sm);
-    text-align:left;
-    align-items:stretch;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:13px 14px;cursor:pointer;box-shadow:var(--shadow-sm);text-align:left;
   }
   .lot-card:active{transform:scale(.995);}
-  .lot-pin{
-    flex:none;
-    width:30px;height:30px;
-    border-radius:9px;
-    background:var(--accent-soft);
-    color:var(--accent-strong);
-    display:flex;align-items:center;justify-content:center;
-    font-size:12.5px;font-weight:800;
-    font-family:"JetBrains Mono",monospace;
-  }
-  .lot-body{flex:1;min-width:0;}
-  .lot-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:8px;
-  }
-  .lot-name{
-    font-size:14.5px;
-    font-weight:700;
-    letter-spacing:-0.01em;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-  .lot-dist{
-    flex:none;
-    font-size:12px;
-    font-weight:700;
-    color:var(--text-muted);
-  }
-  .lot-addr{
-    font-size:12px;
-    color:var(--text-muted);
-    margin-top:1px;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-  .lot-badges{
-    display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;
-  }
-  .badge{
-    font-size:10.5px;
-    font-weight:700;
-    padding:2.5px 7px;
-    border-radius:6px;
-    background:var(--surface-2);
-    color:var(--text-muted);
-    letter-spacing:.01em;
-  }
-  .lot-bottom{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-top:10px;
-    gap:10px;
-  }
-  .lots-figure{
-    font-size:15px;
-    font-weight:800;
-    display:flex;
-    align-items:baseline;
-    gap:5px;
-  }
-  .lots-figure span{
-    font-size:11px;
-    font-weight:600;
-    color:var(--text-muted);
-  }
-  .status-pill{
-    font-size:10.5px;
-    font-weight:800;
-    padding:3px 9px;
-    border-radius:999px;
-  }
-  .status-ok{color:var(--ok);background:var(--ok-soft);}
-  .status-warn{color:var(--warn);background:var(--warn-soft);}
-  .status-full{color:var(--full);background:var(--full-soft);}
+  .lot-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .lot-name{font-size:14.5px;font-weight:700;letter-spacing:-0.01em;}
+  .lot-dist{flex:none;font-size:12px;font-weight:700;color:var(--text-muted);}
+  .lot-addr{font-size:12px;color:var(--text-muted);margin-top:1px;}
+  .lot-badges{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center;}
+  .badge{font-size:10.5px;font-weight:700;padding:2.5px 7px;border-radius:6px;background:var(--surface-2);color:var(--text-muted);letter-spacing:.01em;}
+  .badge.moto-yes{background:var(--ok-soft);color:var(--ok);}
+  .badge.moto-no{background:var(--full-soft);color:var(--full);}
+  .badge.moto-unknown{background:var(--warn-soft);color:var(--warn);}
+  .lot-rates{margin-top:9px;font-size:12px;color:var(--text);}
+  .lot-rates .rate-line{display:flex;gap:6px;margin-top:3px;}
+  .lot-rates .rate-label{flex:none;font-weight:700;color:var(--text-muted);width:62px;}
+  .lot-rates .rate-val{flex:1;}
+  .lot-source{margin-top:8px;font-size:10.5px;color:var(--text-muted);font-style:italic;}
 
-  .empty, .state-card{
-    text-align:center;
-    padding:36px 22px;
-    color:var(--text-muted);
-    font-size:13.5px;
-    font-weight:600;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    line-height:1.5;
-  }
-  .state-card b{color:var(--text);}
-
-  .skeleton-card{
-    height:96px;
-    border-radius:var(--radius);
-    background:linear-gradient(100deg, var(--surface) 30%, var(--surface-2) 50%, var(--surface) 70%);
-    background-size:200% 100%;
-    animation:shimmer 1.4s ease-in-out infinite;
-    border:1px solid var(--border);
-  }
-  @media (prefers-reduced-motion: reduce){
-    .skeleton-card{ animation:none; background:var(--surface-2); }
-  }
-  @keyframes shimmer{
-    0%{background-position:200% 0;}
-    100%{background-position:-200% 0;}
-  }
-
-  /* ---------- Open-in-Maps link ---------- */
   .maps-link{
-    display:flex;
-    align-items:center;
-    gap:5px;
-    margin-top:9px;
-    font-size:11.5px;
-    font-weight:700;
-    color:var(--accent);
-    text-decoration:none;
-    width:fit-content;
+    display:inline-flex;align-items:center;gap:5px;margin-top:9px;
+    font-size:11.5px;font-weight:700;color:var(--accent);text-decoration:none;
   }
   .maps-link svg{width:13px;height:13px;}
 
-  /* ---------- Sheet ---------- */
-  .scrim{
-    position:fixed;inset:0;
-    background:rgba(10,14,20,.45);
-    opacity:0;pointer-events:none;
-    transition:opacity .18s ease;
-    z-index:40;
+  .empty, .state-card{
+    text-align:center;padding:36px 22px;color:var(--text-muted);font-size:13.5px;font-weight:600;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);line-height:1.5;
   }
-  .scrim.show{opacity:1;pointer-events:auto;}
-  .sheet{
-    position:fixed;
-    left:0;right:0;bottom:0;
-    max-width:480px;
-    margin:0 auto;
-    background:var(--surface);
-    border-radius:20px 20px 0 0;
-    box-shadow:var(--shadow-md);
-    transform:translateY(100%);
-    transition:transform .22s cubic-bezier(.32,.72,0,1);
-    z-index:41;
-    max-height:88vh;
-    overflow-y:auto;
-    padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
-  }
-  .sheet.show{transform:translateY(0);}
-  .sheet-handle{
-    width:36px;height:4px;border-radius:2px;
-    background:var(--border);
-    margin:10px auto 4px;
-  }
-  .sheet-inner{padding:6px 20px 0;}
-  .sheet-head{
-    display:flex;justify-content:space-between;align-items:flex-start;
-    gap:10px;
-    margin-top:8px;
-  }
-  .sheet-head h2{
-    font-size:19px;
-    font-weight:800;
-    letter-spacing:-0.01em;
-    margin:0 0 2px;
-  }
-  .sheet-addr{font-size:13px;color:var(--text-muted);font-weight:600;}
-  .close-btn{
-    flex:none;
-    width:30px;height:30px;
-    border-radius:50%;
-    border:none;
-    background:var(--surface-2);
-    color:var(--text-muted);
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;
-  }
-  .close-btn svg{width:14px;height:14px;}
+  .state-card b{color:var(--text);}
 
-  .sheet-stats{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:8px;
-    margin-top:16px;
-  }
-  .stat{
-    background:var(--surface-2);
-    border-radius:11px;
-    padding:10px 10px;
-    text-align:left;
-  }
-  .stat .k{font-size:10.5px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
-  .stat .v{font-size:15px;font-weight:800;margin-top:3px;}
-
-  .sheet-section{margin-top:18px;}
-  .sheet-section h3{
-    font-size:11.5px;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    color:var(--text-muted);
-    font-weight:800;
-    margin:0 0 8px;
-  }
-  .rate-table{
-    border:1px solid var(--border);
-    border-radius:11px;
-    overflow:hidden;
-  }
-  .rate-row{
-    display:flex;justify-content:space-between;
-    padding:9px 12px;
-    font-size:13px;
-    font-weight:600;
-  }
-  .rate-row + .rate-row{border-top:1px solid var(--border);}
-  .rate-row b{font-weight:800;}
-
-  .cta-row{
-    margin-top:20px;
-    display:flex;
-    gap:10px;
-  }
-  .btn{
-    flex:1;
-    border:none;
-    border-radius:12px;
-    padding:13px 16px;
-    font-size:14.5px;
-    font-weight:800;
-    cursor:pointer;
-    display:flex;align-items:center;justify-content:center;gap:7px;
-  }
-  .btn svg{width:16px;height:16px;}
-  .btn-primary{background:var(--accent);color:#fff;}
-  .btn-primary:disabled{background:var(--surface-2);color:var(--text-muted);cursor:not-allowed;}
-
-  .hint{
-    margin-top:10px;
-    font-size:11.5px;
-    color:var(--text-muted);
-    text-align:center;
-    font-weight:600;
+  .disclaimer{
+    margin:10px 18px 0;padding:10px 12px;border-radius:11px;font-size:11.5px;font-weight:600;
+    background:var(--warn-soft);color:var(--warn);line-height:1.4;
   }
 
-  /* ---------- Active timer bar ---------- */
-  .hold-bar{
-    position:fixed;
-    left:0;right:0;bottom:0;
-    max-width:480px;
-    margin:0 auto;
-    background:var(--text);
-    color:var(--bg);
-    padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
-    display:flex;
-    align-items:center;
-    gap:12px;
-    z-index:30;
-    transform:translateY(100%);
-    transition:transform .25s ease;
-  }
-  .hold-bar.show{transform:translateY(0);}
-  .hold-bar .hb-dot{
-    width:9px;height:9px;border-radius:50%;
-    background:var(--ok);
-    flex:none;
-    box-shadow:0 0 0 4px color-mix(in srgb, var(--ok) 25%, transparent);
-  }
-  .hold-bar .hb-text{flex:1;min-width:0;}
-  .hold-bar .hb-lot{font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .hold-bar .hb-sub{font-size:11px;opacity:.7;font-weight:600;}
-  .hold-bar .hb-timer{
-    font-size:16px;font-weight:700;
-    flex:none;
-  }
-  .hold-bar .hb-cancel{
-    flex:none;
-    background:rgba(255,255,255,.14);
-    border:none;
-    color:inherit;
-    width:30px;height:30px;
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;
-  }
-  .hold-bar .hb-cancel svg{width:13px;height:13px;}
-
-  /* ---------- Filter sheet ---------- */
-  .toggle-row{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:12px 0;
-    border-bottom:1px solid var(--border);
-  }
-  .toggle-row:last-child{border-bottom:none;}
-  .toggle-row .t-label{font-size:14px;font-weight:700;}
-  .toggle-row .t-sub{font-size:11.5px;color:var(--text-muted);font-weight:600;margin-top:1px;}
-  .switch{
-    width:42px;height:25px;
-    border-radius:999px;
-    background:var(--surface-2);
-    border:1px solid var(--border);
-    position:relative;
-    cursor:pointer;
-    flex:none;
-  }
-  .switch i{
-    position:absolute;
-    top:2px;left:2px;
-    width:19px;height:19px;
-    border-radius:50%;
-    background:var(--surface);
-    box-shadow:var(--shadow-sm);
-    transition:transform .15s ease;
-  }
-  .switch.on{background:var(--accent);border-color:var(--accent);}
-  .switch.on i{transform:translateX(17px);background:#fff;}
-
-  .seg-opts{display:flex;gap:8px;flex-wrap:wrap;}
-  .seg-opt{
-    flex:1;
-    min-width:70px;
-    text-align:center;
-    padding:9px 6px;
-    border-radius:10px;
-    border:1px solid var(--border);
-    background:var(--surface-2);
-    font-size:12.5px;
-    font-weight:700;
-    cursor:pointer;
-  }
-  .seg-opt.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-
-  .toast{
-    position:fixed;
-    left:50%;
-    bottom:calc(90px + env(safe-area-inset-bottom,0px));
-    transform:translate(-50%,10px);
-    background:var(--text);
-    color:var(--bg);
-    padding:10px 16px;
-    border-radius:10px;
-    font-size:13px;
-    font-weight:700;
-    box-shadow:var(--shadow-md);
-    z-index:50;
-    opacity:0;
-    transition:opacity .2s ease, transform .2s ease;
-    pointer-events:none;
-    max-width:calc(100% - 40px);
-    text-align:center;
-  }
-  .toast.show{opacity:1;transform:translate(-50%,0);}
-
-  footer{
-    text-align:center;
-    padding:14px 18px calc(18px + env(safe-area-inset-bottom,0px));
-    font-size:11px;
-    color:var(--text-muted);
-    font-weight:600;
-  }
+  footer{text-align:center;padding:14px 18px calc(18px + env(safe-area-inset-bottom,0px));font-size:11px;color:var(--text-muted);font-weight:600;}
 </style>
 </head>
 <body>
@@ -679,659 +150,214 @@
         <svg viewBox="0 0 24 24" fill="none"><path d="M6 20V6a2 2 0 0 1 2-2h5.5a4.5 4.5 0 0 1 0 9H10v7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <h1>ParkPilot</h1>
-      <span class="tag">· Live via LTA DataMall</span>
+      <span class="tag">· Motorcycle parking finder</span>
     </div>
 
-    <div class="search-row">
-      <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="destInput" type="text" placeholder="Where are you headed?" autocomplete="off" />
-      </div>
-      <button class="locate-btn" id="locateBtn" title="Use my current location">
+    <div class="locate-row">
+      <button class="locate-btn-main" id="locateBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2"/></svg>
+        <span id="locateBtnLabel">Find parking near me</span>
       </button>
     </div>
-
-    <div class="suggest" id="suggestRow"></div>
+    <div class="loc-status" id="locStatus"></div>
   </header>
 
-  <div id="liveBanner"></div>
+  <div class="disclaimer">
+    This is a manually researched directory, not live data — motorcycle policies and rates can change. Always confirm with signage on arrival.
+  </div>
+
+  <div class="country-tabs" id="countryTabs">
+    <div class="country-tab active" data-v="ALL">All</div>
+    <div class="country-tab" data-v="SG">Singapore</div>
+    <div class="country-tab" data-v="JB">Johor Bahru</div>
+  </div>
 
   <div class="toolbar">
-    <div class="toolbar-actions">
-      <button class="filter-btn" id="motoQuickBtn" title="Show only carparks reporting motorcycle lots">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M12 17.5H9l-1.5-5H10l3 5h2.5L13 9h3l1 3.5"/></svg>
-        Motorbike
-      </button>
-      <button class="filter-btn" id="filterBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
-        Filters
-        <span class="dot"></span>
-      </button>
-    </div>
-  </div>
-
-  <div class="result-meta">
-    <span id="resultCount">Loading nearby carparks…</span>
-    <span style="display:flex; align-items:center; gap:10px;">
-      <span class="updated" id="updatedAt"></span>
-      <select id="sortSel">
-        <option value="distance">Nearest</option>
-        <option value="availability">Most open</option>
-      </select>
-    </span>
-  </div>
-
-  <main id="listView"></main>
-
-  <footer>Data: LTA DataMall CarParkAvailabilityv2 · not affiliated with LTA or HDB</footer>
-
-  <div class="hold-bar" id="holdBar">
-    <div class="hb-dot"></div>
-    <div class="hb-text">
-      <div class="hb-lot" id="hbLotName">—</div>
-      <div class="hb-sub">Heading here · personal reminder, not a real reservation</div>
-    </div>
-    <div class="hb-timer mono" id="hbTimer">15:00</div>
-    <button class="hb-cancel" id="hbCancel" title="Cancel timer">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    <button class="filter-btn active" id="motoOnlyBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M12 17.5H9l-1.5-5H10l3 5h2.5L13 9h3l1 3.5"/></svg>
+      Allows motorcycles
     </button>
   </div>
 
-  <div class="scrim" id="scrim"></div>
+  <div class="result-meta" id="resultMeta">Showing all locations · turn on location for distance sorting</div>
 
-  <div class="sheet" id="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-inner" id="sheetInner"></div>
-  </div>
+  <main id="listView"></main>
 
-  <div class="scrim" id="filterScrim"></div>
-  <div class="sheet" id="filterSheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-inner">
-      <div class="sheet-head">
-        <h2>Filters</h2>
-        <button class="close-btn" id="filterClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      </div>
-
-      <div class="sheet-section">
-        <h3>Lot type</h3>
-        <div class="seg-opts" id="lotTypeOpts">
-          <div class="seg-opt active" data-v="ALL">All</div>
-          <div class="seg-opt" data-v="C">Car</div>
-          <div class="seg-opt" data-v="M">Motorcycle</div>
-          <div class="seg-opt" data-v="H">Heavy vehicle</div>
-        </div>
-      </div>
-
-      <div class="sheet-section" style="margin-top:6px;">
-        <div class="toggle-row">
-          <div>
-            <div class="t-label">Available only</div>
-            <div class="t-sub">Hide carparks reporting zero lots</div>
-          </div>
-          <div class="switch" id="swAvail"><i></i></div>
-        </div>
-      </div>
-
-      <div class="cta-row">
-        <button class="btn" id="filterReset" style="flex:1;background:var(--surface-2);color:var(--text);">Reset</button>
-        <button class="btn btn-primary" id="filterApply">Show results</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
+  <footer>Manually compiled directory · not affiliated with any mall or LTA · verify on arrival</footer>
 </div>
 
 <script>
 (function(){
   "use strict";
 
-  /* ---------------- Destinations (real coordinates, Singapore CBD) ---------------- */
-  var DESTINATIONS = [
-    {id:"raffles",  name:"Raffles Place", lat:1.2836, lng:103.8514},
-    {id:"marina",   name:"Marina Bay",    lat:1.2764, lng:103.8547},
-    {id:"orchard",  name:"Orchard Road",  lat:1.3040, lng:103.8318},
-    {id:"cityhall", name:"City Hall",     lat:1.2931, lng:103.8520},
-    {id:"chinatown",name:"Chinatown",     lat:1.2840, lng:103.8437},
-    {id:"bugis",    name:"Bugis",         lat:1.3006, lng:103.8559}
-  ];
-
-  /* ---------------- State ---------------- */
+  var DATA = [];
+  var userLoc = null; // {lat, lng}
   var state = {
-    dest: DESTINATIONS[0],
-    sort: "distance",
-    filters: {lotType:"ALL", availOnly:false},
-    selectedCarparkKey: null,
-    hold: null // {key, name, expiresAt}
+    country: "ALL",
+    motoOnly: true
   };
 
-  var watch = { status: "idle", data: null, error: null, fetchedAt: null };
-  var pollTimer = null;
-  var currentDest = null;
-
-  /* ---------------- Persistence (per-viewer convenience only) ---------------- */
-  function loadHold(){
-    try{
-      var raw = localStorage.getItem("parkpilot_hold");
-      if(!raw) return null;
-      var h = JSON.parse(raw);
-      if(h && h.expiresAt > Date.now()) return h;
-    }catch(e){}
-    return null;
+  function haversineKm(lat1, lon1, lat2, lon2){
+    var R = 6371;
+    var dLat = (lat2-lat1) * Math.PI/180;
+    var dLon = (lon2-lon1) * Math.PI/180;
+    var a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return 2 * R * Math.asin(Math.sqrt(a));
   }
-  function saveHold(h){
-    try{
-      if(h) localStorage.setItem("parkpilot_hold", JSON.stringify(h));
-      else localStorage.removeItem("parkpilot_hold");
-    }catch(e){}
-  }
-
-  /* ---------------- Helpers ---------------- */
-  function carparkKey(c){ return c.carParkId + "|" + c.lotType; }
   function fmtDist(km){
-    if(km === null || km === undefined) return "—";
+    if(km === null || km === undefined) return null;
     return km < 1 ? Math.round(km*1000) + " m" : km.toFixed(1) + " km";
   }
-  function statusClass(c){
-    if(!c.availableLots || c.availableLots <= 0) return "full";
-    if(c.availableLots < 10) return "warn";
-    return "ok";
+  function mapsUrl(c){
+    return "https://www.google.com/maps/search/?api=1&query=" + c.lat + "," + c.lng;
   }
-  function statusLabel(c){
-    var s = statusClass(c);
-    return s === "full" ? "Full" : s === "warn" ? "Filling up" : "Open";
+  function motoBadgeClass(v){
+    return v === "yes" ? "moto-yes" : v === "no" ? "moto-no" : "moto-unknown";
   }
-  function lotTypeLabel(t){
-    return t === "M" ? "Motorcycle" : t === "H" ? "Heavy vehicle" : t === "C" ? "Car" : (t || "—");
-  }
-  function agencyLabel(a){
-    return a === "HDB" ? "HDB" : a === "URA" ? "URA" : a === "LTA" ? "LTA" : (a || "—");
-  }
-  /* General guidance only — not per-carpark, not live. LTA DataMall's feed
-     carries no pricing at all, and there's no current, verifiable, per-carpark
-     rate API for these agencies. Kept intentionally vague rather than wrong. */
-  function rateNote(a){
-    if(a === "HDB"){
-      return "Car ~$0.60/half-hr outside Central Area (higher in Central Area on weekdays, 7am–5pm). Motorcycle ~$0.65 flat per entry. General guide only — exact rate depends on location; check the signage on arrival.";
-    }
-    if(a === "URA"){
-      return "URA on/off-street lots are usually pay-by-half-hour via parking.sg or the coupon system. Rate depends on the specific street/zone — check signage or the parking.sg app for the exact rate.";
-    }
-    return "No published rate for this carpark type. Check signage on arrival.";
-  }
-  function relTime(iso){
-    if(!iso) return "";
-    var ms = Date.now() - new Date(iso).getTime();
-    if(ms < 0) ms = 0;
-    var s = Math.round(ms/1000);
-    if(s < 60) return "updated just now";
-    var m = Math.round(s/60);
-    return "updated " + m + "m ago";
+  function motoBadgeLabel(v){
+    return v === "yes" ? "Motorcycles OK" : v === "no" ? "No motorcycle parking" : "Motorcycle policy unconfirmed";
   }
 
-  function applyFiltersSort(list){
-    var f = state.filters;
-    var out = (list || []).filter(function(c){
-      if(f.lotType !== "ALL" && c.lotType !== f.lotType) return false;
-      if(f.availOnly && (!c.availableLots || c.availableLots <= 0)) return false;
+  var listView = document.getElementById("listView");
+  var resultMeta = document.getElementById("resultMeta");
+
+  function applyFilters(){
+    var out = DATA.filter(function(c){
+      if(state.country !== "ALL" && c.country !== state.country) return false;
+      if(state.motoOnly && c.motorcycleAllowed === "no") return false;
       return true;
     });
-    out.sort(function(a,b){
-      if(state.sort === "availability") return (b.availableLots||0) - (a.availableLots||0);
-      return (a.distanceKm||999) - (b.distanceKm||999);
+    out.forEach(function(c){
+      c._distanceKm = userLoc ? haversineKm(userLoc.lat, userLoc.lng, c.lat, c.lng) : null;
     });
+    if(userLoc){
+      out.sort(function(a,b){ return (a._distanceKm||9999) - (b._distanceKm||9999); });
+    } else {
+      out.sort(function(a,b){ return a.name.localeCompare(b.name); });
+    }
     return out;
   }
 
-  /* ---------------- Header suggestions ---------------- */
-  var suggestRow = document.getElementById("suggestRow");
-  DESTINATIONS.forEach(function(d){
-    var b = document.createElement("button");
-    b.textContent = d.name;
-    b.dataset.id = d.id;
-    b.addEventListener("click", function(){ setDestination(d); });
-    suggestRow.appendChild(b);
-  });
-  var destInput = document.getElementById("destInput");
-
-  function setDestination(d){
-    state.dest = d;
-    destInput.value = d.name;
-    Array.prototype.forEach.call(suggestRow.children, function(btn){
-      btn.classList.toggle("active", btn.dataset.id === d.id);
-    });
-    state.selectedCarparkKey = null;
-    subscribeDestination(d);
-  }
-  destInput.addEventListener("input", function(){
-    var v = destInput.value.trim().toLowerCase();
-    if(!v) return;
-    var match = DESTINATIONS.find(function(d){ return d.name.toLowerCase().indexOf(v) === 0; });
-    if(match && match.id !== state.dest.id){
-      setDestination(match);
-      destInput.value = v; // keep what the user is typing
-    }
-  });
-
-  /* ---------------- Geolocation: "near me" ---------------- */
-  var locateBtn = document.getElementById("locateBtn");
-  var locChip = null;
-  function ensureLocChip(){
-    if(locChip) return locChip;
-    locChip = document.createElement("button");
-    locChip.textContent = "Near me";
-    locChip.dataset.id = "me";
-    locChip.addEventListener("click", function(){ locateMe(true); });
-    suggestRow.insertBefore(locChip, suggestRow.firstChild);
-    return locChip;
-  }
-
-  function locateMe(interactive){
-    if(!("geolocation" in navigator)){
-      if(interactive) showToast("This browser doesn't support location");
-      return;
-    }
-    locateBtn.classList.add("loading");
-    navigator.geolocation.getCurrentPosition(
-      function(pos){
-        locateBtn.classList.remove("loading");
-        var lat = pos.coords.latitude, lng = pos.coords.longitude;
-        // The live feed only covers Singapore carparks (LTA DataMall) — if the
-        // viewer is elsewhere (e.g. across the causeway in JB), say so plainly
-        // instead of quietly returning nothing useful.
-        if(lat < 1 || lat > 2 || lng < 103 || lng > 104.2){
-          if(interactive) showToast("Live carpark data only covers Singapore — pick a destination instead.");
-          return;
-        }
-        locateBtn.classList.add("active");
-        ensureLocChip();
-        setDestination({
-          id: "me",
-          name: "Near me",
-          lat: lat,
-          lng: lng
-        });
-      },
-      function(err){
-        locateBtn.classList.remove("loading");
-        if(!interactive) return; // silent boot attempt — fall back quietly to the default destination
-        var msg = "Couldn't get your location.";
-        if(err && err.code === err.PERMISSION_DENIED) msg = "Location permission denied — pick a destination instead.";
-        else if(err && err.code === err.TIMEOUT) msg = "Location request timed out — try again or pick a destination.";
-        showToast(msg);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-    );
-  }
-
-  locateBtn.addEventListener("click", function(){ locateMe(true); });
-
-  var listView = document.getElementById("listView");
-
-  document.getElementById("sortSel").addEventListener("change", function(e){
-    state.sort = e.target.value;
-    render();
-  });
-
-  /* ---------------- Filter sheet ---------------- */
-  var filterSheet = document.getElementById("filterSheet"), filterScrim = document.getElementById("filterScrim");
-  function openFilters(){ filterSheet.classList.add("show"); filterScrim.classList.add("show"); }
-  function closeFilters(){ filterSheet.classList.remove("show"); filterScrim.classList.remove("show"); }
-  document.getElementById("filterBtn").addEventListener("click", openFilters);
-  document.getElementById("filterClose").addEventListener("click", closeFilters);
-  filterScrim.addEventListener("click", closeFilters);
-
-  var lotTypeOpts = document.getElementById("lotTypeOpts");
-  function syncLotTypeOpts(){
-    Array.prototype.forEach.call(lotTypeOpts.children, function(o){
-      o.classList.toggle("active", o.dataset.v === state.filters.lotType);
-    });
-  }
-  Array.prototype.forEach.call(lotTypeOpts.children, function(opt){
-    opt.addEventListener("click", function(){
-      state.filters.lotType = opt.dataset.v;
-      syncLotTypeOpts();
-    });
-  });
-
-  var swAvail = document.getElementById("swAvail");
-  swAvail.addEventListener("click", function(){
-    state.filters.availOnly = !state.filters.availOnly;
-    swAvail.classList.toggle("on", state.filters.availOnly);
-  });
-
-  document.getElementById("filterReset").addEventListener("click", function(){
-    state.filters = {lotType:"ALL", availOnly:false};
-    syncLotTypeOpts();
-    swAvail.classList.remove("on");
-    subscribeDestination(state.dest);
-  });
-  document.getElementById("filterApply").addEventListener("click", function(){
-    closeFilters();
-    subscribeDestination(state.dest);
-  });
-
-  /* Quick chip: jump straight to "carparks with motorcycle lots nearby" */
-  var motoQuickBtn = document.getElementById("motoQuickBtn");
-  motoQuickBtn.addEventListener("click", function(){
-    state.filters.lotType = (state.filters.lotType === "M") ? "ALL" : "M";
-    syncLotTypeOpts();
-    syncFilterBtn();
-    subscribeDestination(state.dest);
-  });
-
-  function syncFilterBtn(){
-    var f = state.filters;
-    var active = f.lotType !== "ALL" || f.availOnly;
-    document.getElementById("filterBtn").classList.toggle("has-active", active);
-    motoQuickBtn.classList.toggle("active", f.lotType === "M");
-  }
-
-  /* ---------------- Live data: plain fetch() against the Railway-hosted API ----------------
-     This copy of the page is served as a static file from GitHub Pages, which
-     cannot run the backend itself — so it calls the same API on Railway
-     directly (that endpoint already sends Access-Control-Allow-Origin: *). */
-  var API_BASE = "https://parkpilot-mcp-production.up.railway.app";
-  function currentQuery(dest){
-    var wantsMoto = state.filters.lotType === "M";
-    var params = new URLSearchParams();
-    params.set("lat", dest.lat);
-    params.set("lng", dest.lng);
-    params.set("radiusKm", wantsMoto ? 5 : 2);
-    params.set("limit", wantsMoto ? 80 : 40);
-    if(state.filters.lotType && state.filters.lotType !== "ALL"){ params.set("lotType", state.filters.lotType); }
-    return params.toString();
-  }
-
-  function fetchOnce(){
-    var dest = currentDest;
-    fetch(API_BASE + "/api/carparks?" + currentQuery(dest))
-      .then(function(res){
-        if(!res.ok){
-          return res.json().catch(function(){ return {}; }).then(function(body){
-            throw new Error(body && body.error ? body.error : ("HTTP " + res.status));
-          });
-        }
-        return res.json();
-      })
-      .then(function(payload){
-        if(dest !== currentDest) return; // a newer destination/filter change superseded this request
-        watch = {
-          status: "ready",
-          data: Array.isArray(payload.carparks) ? payload.carparks : [],
-          error: null,
-          fetchedAt: payload.fetchedAt || new Date().toISOString()
-        };
-        render();
-      })
-      .catch(function(err){
-        if(dest !== currentDest) return;
-        if(watch.data){
-          watch = { status: "stale", data: watch.data, error: err, fetchedAt: watch.fetchedAt };
-        } else {
-          watch = { status: "error", data: null, error: err, fetchedAt: null };
-        }
-        render();
-      });
-  }
-
-  function subscribeDestination(dest){
-    currentDest = dest;
-    if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
-    watch = { status: "loading", data: watch.data, error: null, fetchedAt: watch.fetchedAt };
-    render();
-    fetchOnce();
-    pollTimer = setInterval(fetchOnce, 60000);
-  }
-
-  /* ---------------- Rendering ---------------- */
-  var liveBannerEl = document.getElementById("liveBanner");
-
-  function renderBanner(){
-    liveBannerEl.innerHTML = "";
-    if(watch.status === "stale"){
-      var div = document.createElement("div");
-      div.className = "live-banner warn";
-      div.innerHTML = '<span class="dot"></span><span></span>';
-      div.querySelector("span:last-child").textContent = "Couldn't refresh just now — showing the last update from " + relTime(watch.fetchedAt) + ".";
-      liveBannerEl.appendChild(div);
-    }
-  }
-
   function render(){
-    renderBanner();
-    syncFilterBtn();
-
-    var updatedEl = document.getElementById("updatedAt");
-    var countEl = document.getElementById("resultCount");
-
-    if(watch.status === "loading" && !watch.data){
-      countEl.textContent = "Loading nearby carparks…";
-      updatedEl.textContent = "";
-      listView.innerHTML = "";
-      for(var i=0;i<3;i++){
-        var sk = document.createElement("div");
-        sk.className = "skeleton-card";
-        listView.appendChild(sk);
-      }
-      return;
-    }
-
-    if(watch.status === "error" && !watch.data){
-      countEl.textContent = "Live data near " + state.dest.name;
-      updatedEl.textContent = "";
-      listView.innerHTML = "";
-      var card = document.createElement("div");
-      card.className = "state-card";
-      card.innerHTML = "<b>No live data to show.</b><br>Couldn't reach the carpark feed" + (watch.error && watch.error.message ? ": " + watch.error.message : "") + ". Retrying automatically.";
-      listView.appendChild(card);
-      return;
-    }
-
-    var results = applyFiltersSort(watch.data);
-    countEl.textContent = results.length + (results.length === 1 ? " carpark" : " carparks") + " near " + state.dest.name;
-    updatedEl.textContent = relTime(watch.fetchedAt);
+    var results = applyFilters();
+    resultMeta.textContent = results.length + (results.length===1?" location":" locations") +
+      (userLoc ? " · sorted by distance" : " · turn on location for distance sorting");
 
     listView.innerHTML = "";
     if(results.length === 0){
       var e = document.createElement("div");
       e.className = "empty";
-      e.textContent = "No carparks match those filters nearby. Try widening them.";
+      e.textContent = "No locations match those filters. Try widening them.";
       listView.appendChild(e);
-    } else {
-      results.forEach(function(c, i){ listView.appendChild(carparkCard(c, i)); });
+      return;
     }
+    results.forEach(function(c){ listView.appendChild(carCard(c)); });
   }
 
-  /* Universal link — opens in Google Maps on the phone (or the web) with
-     no dependency on any custom map rendering here. */
-  function mapsUrl(c){
-    if(c.lat == null || c.lng == null) return null;
-    return "https://www.google.com/maps/search/?api=1&query=" + c.lat + "," + c.lng;
-  }
-
-  function carparkCard(c, idx){
+  function carCard(c){
     var card = document.createElement("div");
     card.className = "lot-card";
-    card.tabIndex = 0;
-    card.setAttribute("role", "button");
-    var sc = statusClass(c);
-    var mUrl = mapsUrl(c);
+    var dist = fmtDist(c._distanceKm);
     card.innerHTML =
-      '<div class="lot-pin">'+(idx+1)+'</div>'+
-      '<div class="lot-body">'+
-        '<div class="lot-top">'+
-          '<div class="lot-name">'+c.development+'</div>'+
-          '<div class="lot-dist">'+fmtDist(c.distanceKm)+'</div>'+
-        '</div>'+
-        '<div class="lot-addr">'+agencyLabel(c.agency)+' · '+c.carParkId+'</div>'+
-        '<div class="lot-badges">'+
-          '<span class="badge">'+lotTypeLabel(c.lotType)+'</span>'+
-        '</div>'+
-        '<div class="lot-bottom">'+
-          '<div class="lots-figure">'+(c.availableLots != null ? c.availableLots : '—')+'<span>lots free</span></div>'+
-          '<span class="status-pill status-'+sc+'">'+statusLabel(c)+'</span>'+
-        '</div>'+
-        (mUrl ? '<a class="maps-link" href="'+mUrl+'" target="_blank" rel="noopener">'+
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5.5-2V4L9 6m0 14l6-2m-6 2V6m6 12l5.5 2V6L15 4m0 14V4m0 0L9 6"/></svg>'+
-          'Open in Maps</a>' : '')+
-      '</div>';
+      '<div class="lot-top">'+
+        '<div class="lot-name">'+c.name+'</div>'+
+        (dist ? '<div class="lot-dist">'+dist+'</div>' : '')+
+      '</div>'+
+      '<div class="lot-addr">'+c.area+', '+(c.country === "SG" ? "Singapore" : "Johor Bahru")+'</div>'+
+      '<div class="lot-badges">'+
+        '<span class="badge '+motoBadgeClass(c.motorcycleAllowed)+'">'+motoBadgeLabel(c.motorcycleAllowed)+'</span>'+
+      '</div>'+
+      '<div class="lot-rates">'+
+        '<div class="rate-line"><span class="rate-label">Moto</span><span class="rate-val">'+(c.motorcycleRate||"Unconfirmed")+'</span></div>'+
+        '<div class="rate-line"><span class="rate-label">Car</span><span class="rate-val">'+(c.carRate||"Unconfirmed")+'</span></div>'+
+      '</div>'+
+      '<div class="lot-source">Source: '+c.sourceNote+' · checked '+c.lastChecked+'</div>'+
+      '<a class="maps-link" href="'+mapsUrl(c)+'" target="_blank" rel="noopener">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5.5-2V4L9 6m0 14l6-2m-6 2V6m6 12l5.5 2V6L15 4m0 14V4m0 0L9 6"/></svg>'+
+        'Open in Maps</a>';
     card.addEventListener("click", function(e){
       if(e.target.closest(".maps-link")) return;
-      openSheet(c);
-    });
-    card.addEventListener("keydown", function(e){
-      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openSheet(c); }
+      window.open(mapsUrl(c), "_blank", "noopener");
     });
     return card;
   }
 
-  /* ---------------- Detail sheet ---------------- */
-  var sheet = document.getElementById("sheet"), scrim = document.getElementById("scrim");
-  var sheetInner = document.getElementById("sheetInner");
-
-  function openSheet(c){
-    var key = carparkKey(c);
-    state.selectedCarparkKey = key;
-
-    var sc = statusClass(c);
-    var isHeldHere = state.hold && state.hold.key === key;
-    var canStart = (c.availableLots > 0) && (!state.hold || isHeldHere);
-
-    sheetInner.innerHTML =
-      '<div class="sheet-head">'+
-        '<div><h2>'+c.development+'</h2><div class="sheet-addr">'+agencyLabel(c.agency)+' · Carpark '+c.carParkId+'</div></div>'+
-        '<button class="close-btn" id="sheetClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'+
-      '</div>'+
-      '<div class="sheet-stats">'+
-        '<div class="stat"><div class="k">Distance</div><div class="v">'+fmtDist(c.distanceKm)+'</div></div>'+
-        '<div class="stat"><div class="k">Lots free</div><div class="v status-'+sc+'">'+(c.availableLots!=null?c.availableLots:'—')+'</div></div>'+
-        '<div class="stat"><div class="k">Lot type</div><div class="v" style="font-size:13px;">'+lotTypeLabel(c.lotType)+'</div></div>'+
-      '</div>'+
-      '<div class="sheet-section">'+
-        '<h3>Live feed</h3>'+
-        '<div class="rate-table">'+
-          '<div class="rate-row"><span>Source</span><b>LTA DataMall</b></div>'+
-          '<div class="rate-row"><span>Managed by</span><b>'+agencyLabel(c.agency)+'</b></div>'+
-          '<div class="rate-row"><span>Data age</span><b>'+relTime(watch.fetchedAt)+'</b></div>'+
-        '</div>'+
-      '</div>'+
-      '<div class="sheet-section">'+
-        '<h3>Typical rates · general guide, not live</h3>'+
-        '<div class="state-card" style="padding:12px 14px;text-align:left;font-weight:600;">'+rateNote(c.agency)+'</div>'+
-      '</div>'+
-      '<div class="cta-row">'+
-        (mapsUrl(c) ? '<a class="btn" href="'+mapsUrl(c)+'" target="_blank" rel="noopener" style="background:var(--surface-2);color:var(--text);flex:none;width:52px;">'+
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5.5-2V4L9 6m0 14l6-2m-6 2V6m6 12l5.5 2V6L15 4m0 14V4m0 0L9 6"/></svg>'+
-        '</a>' : '')+
-        '<button class="btn btn-primary" id="holdBtn" '+(canStart?'':'disabled')+'>'+
-          (isHeldHere ? 'Timer running · manage below' : (canStart ? 'I’m heading here · 15 min timer' : 'Reporting zero lots free')) +
-        '</button>'+
-      '</div>'+
-      '<div class="hint">'+(canStart && !isHeldHere ? 'This just starts a personal countdown — it does not reserve a real bay.' : (state.hold && !isHeldHere ? 'Cancel your current timer to start one here instead.' : ''))+'</div>';
-
-    document.getElementById("sheetClose").addEventListener("click", closeSheet);
-    var holdBtn = document.getElementById("holdBtn");
-    if(holdBtn && !holdBtn.disabled && !isHeldHere){
-      holdBtn.addEventListener("click", function(){ startHold(c); openSheet(c); });
-    }
-
-    sheet.classList.add("show");
-    scrim.classList.add("show");
-  }
-  function closeSheet(){
-    sheet.classList.remove("show");
-    scrim.classList.remove("show");
-  }
-  scrim.addEventListener("click", closeSheet);
-
-  /* ---------------- Personal arrival timer (not a real reservation) ---------------- */
-  var holdBar = document.getElementById("holdBar");
-  var hbLotName = document.getElementById("hbLotName");
-  var hbTimer = document.getElementById("hbTimer");
-  var tickHandle = null;
-
-  function startHold(c){
-    var key = carparkKey(c);
-    if(state.hold && state.hold.key !== key){
-      showToast("Cancel your current timer first");
-      return;
-    }
-    state.hold = {key: key, name: c.development, expiresAt: Date.now() + 15*60*1000};
-    saveHold(state.hold);
-    showToast("Timer started for " + c.development);
-    startTick();
-  }
-
-  function cancelHold(silent){
-    if(!state.hold) return;
-    state.hold = null;
-    saveHold(null);
-    stopTick();
-    if(!silent) showToast("Timer cancelled");
-    if(sheet.classList.contains("show")){
-      var results = applyFiltersSort(watch.data || []);
-      var current = results.filter(function(c){ return carparkKey(c) === state.selectedCarparkKey; })[0];
-      if(current) openSheet(current);
-    }
-  }
-
-  document.getElementById("hbCancel").addEventListener("click", function(){ cancelHold(false); });
-  holdBar.addEventListener("click", function(e){
-    if(e.target.closest("#hbCancel")) return;
-    var results = applyFiltersSort(watch.data || []);
-    var current = state.hold && results.filter(function(c){ return carparkKey(c) === state.hold.key; })[0];
-    if(current) openSheet(current);
+  /* ---------------- Country tabs ---------------- */
+  var countryTabs = document.getElementById("countryTabs");
+  Array.prototype.forEach.call(countryTabs.children, function(tab){
+    tab.addEventListener("click", function(){
+      Array.prototype.forEach.call(countryTabs.children, function(t){ t.classList.remove("active"); });
+      tab.classList.add("active");
+      state.country = tab.dataset.v;
+      render();
+    });
   });
 
-  function startTick(){
-    stopTick();
-    tickHandle = setInterval(updateHoldBar, 1000);
-    updateHoldBar();
-  }
-  function stopTick(){
-    if(tickHandle){ clearInterval(tickHandle); tickHandle = null; }
-  }
-  function updateHoldBar(){
-    if(!state.hold){ holdBar.classList.remove("show"); return; }
-    var remain = state.hold.expiresAt - Date.now();
-    if(remain <= 0){
-      showToast("Timer finished");
-      cancelHold(true);
+  /* ---------------- Motorcycle-only filter ---------------- */
+  var motoOnlyBtn = document.getElementById("motoOnlyBtn");
+  motoOnlyBtn.addEventListener("click", function(){
+    state.motoOnly = !state.motoOnly;
+    motoOnlyBtn.classList.toggle("active", state.motoOnly);
+    render();
+  });
+
+  /* ---------------- Geolocation ---------------- */
+  var locateBtn = document.getElementById("locateBtn");
+  var locateBtnLabel = document.getElementById("locateBtnLabel");
+  var locStatus = document.getElementById("locStatus");
+
+  function locateMe(){
+    if(!("geolocation" in navigator)){
+      locStatus.textContent = "This browser doesn't support location.";
       return;
     }
-    hbLotName.textContent = state.hold.name || "Carpark";
-    var m = Math.floor(remain/60000), s = Math.floor((remain%60000)/1000);
-    hbTimer.textContent = m + ":" + (s<10?"0":"") + s;
-    holdBar.classList.add("show");
+    locateBtn.classList.add("loading");
+    locateBtnLabel.textContent = "Finding you…";
+    navigator.geolocation.getCurrentPosition(
+      function(pos){
+        locateBtn.classList.remove("loading");
+        locateBtn.classList.add("found");
+        var lat = pos.coords.latitude, lng = pos.coords.longitude;
+        userLoc = {lat: lat, lng: lng};
+        // rough SG/JB bounding box check, just to set a helpful status message
+        var inRegion = (lat > 1.1 && lat < 2.1 && lng > 103.2 && lng < 104.3);
+        locateBtnLabel.textContent = "Location found";
+        locStatus.textContent = inRegion
+          ? "Showing nearest locations first."
+          : "You're outside the SG/JB area covered by this directory — showing all locations, distance may not be meaningful.";
+        render();
+      },
+      function(err){
+        locateBtn.classList.remove("loading");
+        locateBtnLabel.textContent = "Find parking near me";
+        var msg = "Couldn't get your location.";
+        if(err && err.code === err.PERMISSION_DENIED) msg = "Location permission denied — you can still browse the full list below.";
+        else if(err && err.code === err.TIMEOUT) msg = "Location request timed out — try again.";
+        locStatus.textContent = msg;
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
   }
-
-  /* ---------------- Toast ---------------- */
-  var toast = document.getElementById("toast");
-  var toastTimer = null;
-  function showToast(msg){
-    toast.textContent = msg;
-    toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ toast.classList.remove("show"); }, 2200);
-  }
+  locateBtn.addEventListener("click", locateMe);
 
   /* ---------------- Boot ---------------- */
   function boot(){
-    var restored = loadHold();
-    if(restored){
-      state.hold = restored;
-      startTick();
-    }
-    if(suggestRow.children[0]) suggestRow.children[0].classList.add("active");
-
-    // Show the default CBD destination immediately, then quietly try to
-    // switch to the viewer's real location if they grant it — no dialog
-    // blocks first paint, and a decline just leaves the default in place.
-    subscribeDestination(state.dest);
-    locateMe(false);
+    fetch("./data/carparks.json")
+      .then(function(res){
+        if(!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      })
+      .then(function(json){
+        DATA = Array.isArray(json) ? json : [];
+        render();
+      })
+      .catch(function(err){
+        listView.innerHTML = "";
+        var card = document.createElement("div");
+        card.className = "state-card";
+        card.innerHTML = "<b>Couldn't load the carpark directory.</b><br>" + err.message;
+        listView.appendChild(card);
+      });
   }
 
   boot();
