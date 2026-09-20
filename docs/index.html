@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ParkPilot</title>
 <meta name="description" content="Find nearby malls and carparks in Singapore & JB that allow motorcycle parking, with rate info.">
+<link rel="icon" type="image/png" sizes="96x96" href="./assets/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="152x152" href="./assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ParkPilot">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e7c66">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -80,6 +87,19 @@
     text-align:center;min-height:16px;
   }
 
+  .search-box{position:relative;margin-top:10px;}
+  .search-box svg{
+    position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    width:16px;height:16px;color:var(--text-muted);pointer-events:none;
+  }
+  .search-box input{
+    width:100%;padding:11px 12px 11px 36px;border-radius:11px;
+    border:1px solid var(--border);background:var(--surface);color:var(--text);
+    font-size:14px;font-weight:600;outline:none;
+  }
+  .search-box input::placeholder{color:var(--text-muted);font-weight:500;}
+  .search-box input:focus{border-color:var(--accent);}
+
   .toolbar{display:flex;gap:8px;padding:12px 18px 0;flex-wrap:wrap;row-gap:8px;}
   .filter-btn{
     display:flex;align-items:center;gap:6px;border:1px solid var(--border);
@@ -133,11 +153,6 @@
   }
   .state-card b{color:var(--text);}
 
-  .disclaimer{
-    margin:10px 18px 0;padding:10px 12px;border-radius:11px;font-size:11.5px;font-weight:600;
-    background:var(--warn-soft);color:var(--warn);line-height:1.4;
-  }
-
   footer{text-align:center;padding:14px 18px calc(18px + env(safe-area-inset-bottom,0px));font-size:11px;color:var(--text-muted);font-weight:600;}
 </style>
 </head>
@@ -160,11 +175,12 @@
       </button>
     </div>
     <div class="loc-status" id="locStatus"></div>
-  </header>
 
-  <div class="disclaimer">
-    This is a manually researched directory, not live data — motorcycle policies and rates can change. Always confirm with signage on arrival.
-  </div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="searchInput" type="text" placeholder="Search by mall or area name…" autocomplete="off" />
+    </div>
+  </header>
 
   <div class="country-tabs" id="countryTabs">
     <div class="country-tab active" data-v="ALL">All</div>
@@ -183,7 +199,10 @@
 
   <main id="listView"></main>
 
-  <footer>Manually compiled directory · not affiliated with any mall or LTA · verify on arrival</footer>
+  <footer>
+    Manually compiled directory · not affiliated with any mall or LTA · verify on arrival<br>
+    Built by shiftedtech
+  </footer>
 </div>
 
 <script>
@@ -194,8 +213,44 @@
   var userLoc = null; // {lat, lng}
   var state = {
     country: "ALL",
-    motoOnly: true
+    motoOnly: true,
+    query: ""
   };
+
+  /* ---------------- Lightweight fuzzy search (no external AI/API — see note in chat) ----------------
+     Scores a location against the query: exact/substring hits rank highest,
+     then falls back to simple typo-tolerant character overlap so small
+     misspellings ("orchad", "jem mal") still surface the right result. */
+  function levenshtein(a, b){
+    if(a === b) return 0;
+    var al = a.length, bl = b.length;
+    if(al === 0) return bl;
+    if(bl === 0) return al;
+    var prev = new Array(bl + 1);
+    for(var j = 0; j <= bl; j++) prev[j] = j;
+    for(var i = 1; i <= al; i++){
+      var cur = [i];
+      for(var k = 1; k <= bl; k++){
+        var cost = a[i-1] === b[k-1] ? 0 : 1;
+        cur[k] = Math.min(prev[k]+1, cur[k-1]+1, prev[k-1]+cost);
+      }
+      prev = cur;
+    }
+    return prev[bl];
+  }
+  function matchesQuery(c, q){
+    if(!q) return true;
+    var hay = (c.name + " " + c.area).toLowerCase();
+    if(hay.indexOf(q) !== -1) return true;
+    // typo tolerance: compare query against each word in the haystack
+    var words = hay.split(/[\s,()/-]+/).filter(Boolean);
+    for(var i = 0; i < words.length; i++){
+      var w = words[i];
+      var maxDist = q.length <= 4 ? 1 : q.length <= 7 ? 2 : 3;
+      if(w.length >= q.length - maxDist && levenshtein(q, w.slice(0, q.length + maxDist)) <= maxDist) return true;
+    }
+    return false;
+  }
 
   function haversineKm(lat1, lon1, lat2, lon2){
     var R = 6371;
@@ -225,6 +280,7 @@
     var out = DATA.filter(function(c){
       if(state.country !== "ALL" && c.country !== state.country) return false;
       if(state.motoOnly && c.motorcycleAllowed === "no") return false;
+      if(!matchesQuery(c, state.query)) return false;
       return true;
     });
     out.forEach(function(c){
@@ -339,6 +395,18 @@
     );
   }
   locateBtn.addEventListener("click", locateMe);
+
+  /* ---------------- Search ---------------- */
+  var searchInput = document.getElementById("searchInput");
+  var searchDebounce = null;
+  searchInput.addEventListener("input", function(){
+    clearTimeout(searchDebounce);
+    var v = searchInput.value;
+    searchDebounce = setTimeout(function(){
+      state.query = v.trim().toLowerCase();
+      render();
+    }, 120);
+  });
 
   /* ---------------- Boot ---------------- */
   function boot(){
