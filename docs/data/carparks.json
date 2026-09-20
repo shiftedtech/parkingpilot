@@ -1018,5 +1018,17 @@
     "carRate": "unconfirmed",
     "sourceNote": "confirmed as a distinct property from Mid Valley Southkey (per parkinginmalaysia.com note and separate retailer Facebook posts), but no independent parking rate source found",
     "lastChecked": "2026-09-21"
+  },
+  {
+    "name": "AEON Mall Bandar Dato' Onn",
+    "country": "JB",
+    "area": "Bandar Dato' Onn, Johor Bahru",
+    "lat": 1.5216,
+    "lng": 103.6739,
+    "motorcycleAllowed": "yes",
+    "motorcycleRate": "unconfirmed",
+    "carRate": "unconfirmed",
+    "sourceNote": "motorcycle parking confirmed via rider video/forum content; no independent rate-card source found (coordinates approximate)",
+    "lastChecked": "2026-09-21"
   }
 ]

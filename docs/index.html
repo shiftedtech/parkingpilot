@@ -69,6 +69,21 @@
   .brand-mark svg{width:15px;height:15px;}
   .brand h1{font-size:19px;font-weight:800;letter-spacing:-0.02em;margin:0;}
   .brand .tag{font-size:11.5px;color:var(--text-muted);font-weight:600;letter-spacing:.02em;}
+  .add-home-btn{
+    margin-left:auto;display:none;align-items:center;gap:4px;flex:none;
+    border:1px solid var(--border);background:var(--surface-2);color:var(--text);
+    font-size:11px;font-weight:700;padding:5px 9px;border-radius:8px;cursor:pointer;
+  }
+  .add-home-btn.show{display:flex;}
+  .add-home-btn svg{width:12px;height:12px;}
+  .home-tip{
+    position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));
+    z-index:50;background:var(--surface);color:var(--text);border:1px solid var(--border);
+    border-radius:12px;padding:12px 14px;font-size:12.5px;font-weight:600;box-shadow:var(--shadow-md);
+    display:none;
+  }
+  .home-tip.show{display:block;}
+  .home-tip button{margin-top:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;}
 
   .locate-row{display:flex;gap:8px;}
   .locate-btn-main{
@@ -166,6 +181,10 @@
       </div>
       <h1>ParkPilot</h1>
       <span class="tag">· Motorcycle parking finder</span>
+      <button class="add-home-btn" id="addHomeBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        Add
+      </button>
     </div>
 
     <div class="locate-row">
@@ -203,6 +222,12 @@
     Manually compiled directory · not affiliated with any mall or LTA · verify on arrival<br>
     Built by shiftedtech
   </footer>
+</div>
+
+<div class="home-tip" id="homeTip">
+  Tap the <b>Share</b> icon in Safari, then choose <b>“Add to Home Screen”</b>.
+  <br>
+  <button id="homeTipClose" type="button">Got it</button>
 </div>
 
 <script>
@@ -407,6 +432,50 @@
       render();
     }, 120);
   });
+
+  /* ---------------- Add to Home Screen ---------------- */
+  var addHomeBtn = document.getElementById("addHomeBtn");
+  var homeTip = document.getElementById("homeTip");
+  var homeTipClose = document.getElementById("homeTipClose");
+  var deferredInstallPrompt = null;
+
+  function isStandalone(){
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+  function isIOS(){
+    return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  }
+
+  if(!isStandalone()){
+    if(isIOS()){
+      // No install-prompt API on iOS Safari; show button that opens instructions.
+      addHomeBtn.classList.add("show");
+      addHomeBtn.addEventListener("click", function(){
+        homeTip.classList.add("show");
+      });
+      homeTipClose.addEventListener("click", function(){
+        homeTip.classList.remove("show");
+      });
+    } else {
+      window.addEventListener("beforeinstallprompt", function(e){
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        addHomeBtn.classList.add("show");
+      });
+      addHomeBtn.addEventListener("click", function(){
+        if(!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.finally(function(){
+          deferredInstallPrompt = null;
+          addHomeBtn.classList.remove("show");
+        });
+      });
+      window.addEventListener("appinstalled", function(){
+        addHomeBtn.classList.remove("show");
+      });
+    }
+  }
 
   /* ---------------- Boot ---------------- */
   function boot(){
